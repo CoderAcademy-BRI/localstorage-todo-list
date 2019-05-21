@@ -40,8 +40,10 @@
 
         // Run the addTask function, pass it the current text in the input
         let task = $('form input').val()
-        addTask(task);
-        saveTask(task)
+
+        tasks.push(task)
+        addTask(task); // update the list in the page
+        saveTasks()
 
         // Set the input value back to empty after we add a task
         $('form input').val('');
@@ -58,6 +60,9 @@
         updateProgress();
       });
 
+      // an array to store all tasks. 
+      let tasks = []
+
       addTask = (task) => {
         // Create a task and add it to #tasks
         $('#tasks').prepend($(`<div class="notification">${task}</div>`));
@@ -66,27 +71,29 @@
         $('h1').text($('#tasks div').length);
       }
 
-      // Save a task to localStorage
-      // We need to load existing tasks and add our task to avoid 
-      // overwriting any existing tasks
-      saveTask = (task) => {
-        let existingTasks = localStorage.getItem("task") // Buy cheese,Buy bread
-        // check if we have existing tasks
-        if (typeof existingTasks == "string") {
-          existingTasks = existingTasks.split(",") // ["buy cheese", "buy bread"]
-          existingTasks.push(task)
-          localStorage.setItem("task", existingTasks.join(","))
-        } else { // there are no existing tasks so add the first task
-          localStorage.setItem("task", task)
-        }
+      // Save all tasks to localStorage
+      saveTasks = () => {
+        // create a JSON string of our tasks array
+        const data = JSON.stringify(tasks)
+
+        // store in localStorage
+        localStorage.setItem("tasksJSON", data)
       }
+
       // Load any stored todo items and restore them to the list
       loadTasks = () => {
-        let tasks = localStorage.getItem("task")
-        if (typeof tasks == "string") {
-          tasks.split(",").forEach(task => {
+        const existingTasksData = localStorage.getItem("tasksJSON")
+
+        if (typeof existingTasksData == "string") {
+          // update our tasks array with existing tasks
+          // This makes it easier to save tasks later: all tasks are always stored 
+          // in the tasks array
+          tasks = JSON.parse(existingTasksData)
+
+          // update the list in the page with all existing tasks
+          tasks.forEach(task => {
             addTask(task)
-          })
+          });
         }
       }
 
