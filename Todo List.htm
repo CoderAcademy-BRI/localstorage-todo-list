@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Todo List</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.6.2/css/bulma.min.css">
+  </head>
+  <body class="has-text-centered">
+    <progress class="progress is-primary" value="0" max="100">0</progress>
+    <nav class="level">
+      <div class="level-item">
+        <div>
+          <div class="heading">To Do</div>
+          <h1 class="title is-1">0</h1>
+        </div>
+      </div>
+    </nav>
+
+    <form>
+      <input type="text" class="input is-large is-primary has-text-centered" placeholder="add a todo!" value="">
+    </form>
+
+    <br>
+
+    <div id="tasks"></div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script>
+    //
+    // Dollar $ign means jQuery :)
+    //
+
+    // Wait for the page to be ready before running our JS
+    $(document).ready(() => {
+
+      // Listen for form submission
+      $('form').submit((event) => {
+        // Prevent the browser from handling the form
+        event.preventDefault();
+
+        // Run the addTask function, pass it the current text in the input
+        let task = $('form input').val()
+        addTask(task);
+        saveTask(task)
+
+        // Set the input value back to empty after we add a task
+        $('form input').val('');
+      });
+
+      // On task click
+      $('#tasks').on('click', '.notification', function () {
+        // Mark task as complete
+        // Note we're not using arrow function syntax for our callback because we want to preserve 'this'.
+        // In this context, 'this' refers to the notification that has been clicked.
+        $(this).toggleClass('is-primary');
+
+        // Update progress bar
+        updateProgress();
+      });
+
+      addTask = (task) => {
+        // Create a task and add it to #tasks
+        $('#tasks').prepend($(`<div class="notification">${task}</div>`));
+
+        // Update our h1 with the total number of tasks
+        $('h1').text($('#tasks div').length);
+      }
+
+      // Save a task to localStorage
+      // We need to load existing tasks and add our task to avoid 
+      // overwriting any existing tasks
+      saveTask = (task) => {
+        let existingTasks = localStorage.getItem("task") // Buy cheese,Buy bread
+        // check if we have existing tasks
+        if (typeof existingTasks == "string") {
+          existingTasks = existingTasks.split(",") // ["buy cheese", "buy bread"]
+          existingTasks.push(task)
+          localStorage.setItem("task", existingTasks.join(","))
+        } else { // there are no existing tasks so add the first task
+          localStorage.setItem("task", task)
+        }
+      }
+      // Load any stored todo items and restore them to the list
+      loadTasks = () => {
+        let tasks = localStorage.getItem("task")
+        if (typeof tasks == "string") {
+          tasks.split(",").forEach(task => {
+            addTask(task)
+          })
+        }
+      }
+
+      // Update progress bar
+      updateProgress = () => {
+        const totalTasks = $('#tasks div').length;
+        const completedTasks = $('#tasks div.notification.is-primary').length;
+        $('progress').val((completedTasks/totalTasks) * 100);
+      }
+
+      loadTasks()
+    });
+
+
+    </script>
+
+  </body>
+</html>
